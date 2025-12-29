@@ -940,13 +940,13 @@ class ASTVisitor(ast.NodeVisitor):
         # Building a graph for RHS value
         value_fg = self.visit(node.value)
         
-        # Create the assignment
+        # Creating the assignment
         assign_fg = self._visit_simple_assign(node.target, value_fg, is_op_unmappable=True)
         
-        # Create a variable usage node to represent the returned value
+        # Creating a variable usage node to represent the returned value
         var_usage_fg = self._visit_var_usage(node.target)
         
-        # Merge assignment and usage graphs
+        # Merging assignment and usage graphs
         assign_fg.merge_graph(var_usage_fg)
         
         return assign_fg

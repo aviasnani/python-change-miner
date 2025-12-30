@@ -964,14 +964,7 @@ class ASTVisitor(ast.NodeVisitor):
         fg_else = self._visit_control_node_body(control_node, node.orelse, False)
         fg.parallel_merge_graphs([fg_if, fg_else])
         return fg
-    
-    def visit_Match(self, node):
-        sub_fg = self.visit(node.subject) # visiting the subject node or the current node 
-        match_node = ControlNode(ControlNode.Label.MATCH, node, self.control_branch_stack) # creating a 'Match' labeled node and defining that its a type of control_branch_stack
-        match_node.set_property(Node.Property.SYNTAX_TOKEN_INTERVALS,
-                                [[node.first_token.startpos, node.first_token.endpos]]) # assigning asttokens to the start and end position of each part of the match statement, this tells exactly at what position the statement started and where it ended.
         
-
     def visit_IfExp(self, node):
         line_to_log = node.first_token.line
         if hasattr(node, 'body') and isinstance(node.body, list):

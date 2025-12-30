@@ -936,7 +936,7 @@ class ASTVisitor(ast.NodeVisitor):
                 f"Fail in visited node = {node}, unsupported func type = {node.func} line = {node.first_token.line}")
             return None
     
-    def visit_NamedExpr(self, node): # contribution_walrus
+    def visit_NamedExpr(self, node):  # contribution walrus
         # Building a graph for RHS value
         value_fg = self.visit(node.value)
         
@@ -964,7 +964,7 @@ class ASTVisitor(ast.NodeVisitor):
         fg_else = self._visit_control_node_body(control_node, node.orelse, False)
         fg.parallel_merge_graphs([fg_if, fg_else])
         return fg
-        
+
     def visit_IfExp(self, node):
         line_to_log = node.first_token.line
         if hasattr(node, 'body') and isinstance(node.body, list):

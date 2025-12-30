@@ -23,8 +23,8 @@ class BuildingContext:
     def add_variable(self, node):
         def_nodes = self.var_key_to_def_nodes.setdefault(node.key, set())
         for def_node in [def_node for def_node in def_nodes if def_node.key == node.key]:
-            def_node_stack = def_node.get_property(Node.Property.DEF_CONTROL_BRANCH_STACK)
-            node_stack = node.get_property(Node.Property.DEF_CONTROL_BRANCH_STACK)
+            def_node_stack = def_node.get_property(Node.Property.DEF_CONTROL_BRANCH_STACK) # getting the branch stack property of the existing node 
+            node_stack = node.get_property(Node.Property.DEF_CONTROL_BRANCH_STACK) # getting the branch stack property of the current node , this is to check whether the nodes are from the same branch or different branches
 
             if len(def_node_stack) < len(node_stack):
                 continue
@@ -37,7 +37,7 @@ class BuildingContext:
     def remove_variables(self, control_stack_branch):
         for def_nodes in self.var_key_to_def_nodes.values():
             same_stack_defs = [node for node in def_nodes
-                               if node.get_property(Node.Property.DEF_CONTROL_BRANCH_STACK) == control_stack_branch]
+                               if node.get_property(Node.Property.DEF_CONTROL_BRANCH_STACK) == control_stack_branch] #if the assignments have been done in the same branch 
             for def_node in same_stack_defs:
                 def_nodes.remove(def_node)
 
@@ -47,7 +47,7 @@ class BuildingContext:
 
 class GraphBuilder:
     def build_from_source(self, source_code, show_dependencies=False, build_closure=True):
-        models._statement_cnt = 0
+        models._statement_cnt = 0 # a global counter that gets reset after each graph build, important so the graphs are consistent
         try:
             source_code_ast = ast.parse(source_code, mode='exec')
             logger.info(f"Parsing completed, code = {source_code}")
@@ -55,9 +55,9 @@ class GraphBuilder:
             logger.error(f"Error in parsing, code = {source_code}")
             raise GraphBuildingException
 
-        tokenized_ast = asttokens.ASTTokens(source_code, tree=source_code_ast)
+        tokenized_ast = asttokens.ASTTokens(source_code, tree=source_code_ast) # gives each ast tree a token or a special number
 
-        if isinstance(tokenized_ast.tree, ast.Module) and isinstance(tokenized_ast.tree.body[0], ast.FunctionDef):
+        if isinstance(tokenized_ast.tree, ast.Module) and isinstance(tokenized_ast.tree.body[0], ast.FunctionDef): #checks if the tree is a python file (module) and the first thing in the file is a function
             root_ast = tokenized_ast.tree.body[0]
         else:
             root_ast = tokenized_ast.tree
@@ -96,13 +96,13 @@ class GraphBuilder:
             in_nodes = edge.node_from.get_definitions()
             if not in_nodes:
                 in_nodes.add(edge.node_from)
-            else:
+            else:  
                 for in_node in in_nodes:
                     if not node.has_in_edge(in_node, edge.label):
                         in_node.create_edge(node, edge.label)
 
             for in_node in in_nodes:
-                if in_node not in processed_nodes:
+                if in_node not in processed_nodes: 
                     cls._build_data_closure(in_node, processed_nodes)
 
                 for in_node_edge in in_node.in_edges:
@@ -935,7 +935,22 @@ class ASTVisitor(ast.NodeVisitor):
             logger.error(
                 f"Fail in visited node = {node}, unsupported func type = {node.func} line = {node.first_token.line}")
             return None
-
+    
+    def visit_NamedExpr(self, node): # contribution_walrus
+        # Building a graph for RHS value
+        value_fg = self.visit(node.value)
+        
+        # Creating the assignment
+        assign_fg = self._visit_simple_assign(node.target, value_fg, is_op_unmappable=True)
+        
+        # Creating a variable usage node to represent the returned value
+        var_usage_fg = self._visit_var_usage(node.target)
+        
+        # Merging assignment and usage graphs
+        assign_fg.merge_graph(var_usage_fg)
+        
+        return assign_fg
+    
     # Control statement visits
     def visit_If(self, node):
         control_node = ControlNode(ControlNode.Label.IF, node, self.control_branch_stack)
@@ -949,6 +964,13 @@ class ASTVisitor(ast.NodeVisitor):
         fg_else = self._visit_control_node_body(control_node, node.orelse, False)
         fg.parallel_merge_graphs([fg_if, fg_else])
         return fg
+    
+    def visit_Match(self, node):
+        sub_fg = self.visit(node.subject) # visiting the subject node or the current node 
+        match_node = ControlNode(ControlNode.Label.MATCH, node, self.control_branch_stack) # creating a 'Match' labeled node and defining that its a type of control_branch_stack
+        match_node.set_property(Node.Property.SYNTAX_TOKEN_INTERVALS,
+                                [[node.first_token.startpos, node.first_token.endpos]]) # assigning asttokens to the start and end position of each part of the match statement, this tells exactly at what position the statement started and where it ended.
+        
 
     def visit_IfExp(self, node):
         line_to_log = node.first_token.line
@@ -1112,6 +1134,7 @@ class ASTVisitor(ast.NodeVisitor):
 
     def visit_FormattedValue(self, node):
         return self.visit(node.value)
+    
 
     def visit_JoinedStr(self, node):
         g = self.create_graph()

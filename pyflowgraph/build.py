@@ -982,13 +982,15 @@ class ASTVisitor(ast.NodeVisitor):
         sub_fg.add_node(match_node,link_type = LinkType.CONDITION) # attaching the match node with the subject i.e. any variable that is being matched or compared with the cases.
         case_array = [] # an array of cases (initially empty)
         for case in node.cases: # looping through each case in the match node's body
+            self._switch_control_branch(match_node, True)
             case_fg = self.visit(case) # visiting each node
+            self._pop_control_branch()
             case_array.append(case_fg) # appending every case visit to the array 'case_array'
         sub_fg.parallel_merge_graphs(case_array)  
         return sub_fg
 
-    def visit_matchCase(self, node):
-        case_node = ControlNode(ControlNode.Label.CASE, self.control_branch_stack) # creating case nodes
+    def visit_match_case(self, node):
+        case_node = ControlNode(ControlNode.Label.CASE,node, self.control_branch_stack) # creating case nodes
         case_node.set_property(Node.Property.SYNTAX_TOKEN_INTERVALS,
                                [[node.first_token.startpos, node.first_token.endpos]]) # assigning asttokens to the start and end position of each part of the match statement, this tells exactly at what position the statement started and where it ended, and helps code to graph mapping.
         fg = self.create_graph()

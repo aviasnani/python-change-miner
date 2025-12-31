@@ -169,7 +169,8 @@ class OperationNode(StatementNode):
         LISTCOMP = 'ListComprehension'
         DICTCOMP = 'DictComprehension'
         GENERATOREXPR = 'GeneratorExpression'
-        COMPREHENSION = 'comprehension'
+        COMPREHENSION = 'comprehension',
+
 
     class Kind:
         COLLECTION = 'collection'
@@ -207,9 +208,11 @@ class ControlNode(StatementNode):
         WHILE = 'while'
         TRY = 'try'
         EXCEPT = 'except'
-        ASSERT = 'assert'
+        ASSERT = 'assert',
+        MATCH = 'match',
+        CASE = 'case'
 
-        ALL = [IF, FOR, TRY, EXCEPT, ASSERT]
+        ALL = [IF, FOR, TRY, EXCEPT, WHILE, ASSERT, MATCH, CASE]
 
     def __init__(self, label, ast, control_branch_stack, /):
         super().__init__(label, ast, control_branch_stack)

@@ -972,8 +972,33 @@ class ASTVisitor(ast.NodeVisitor):
                 line_to_log += expr.first_token.line
         logger.error(f"Failed visited node = {node}, line = {line_to_log}")
         return None
+    
+    def visit_Match(self, node): # match_case_contribution
+        sub_fg = self.visit(node.subject) # visiting the subject node or the current node 
+        match_node = ControlNode(ControlNode.Label.MATCH, node, self.control_branch_stack) # creating a 'Match' labeled node and defining that its a type of control_branch_stack
+        match_node.set_property(Node.Property.SYNTAX_TOKEN_INTERVALS,
+                                [[node.first_token.startpos, node.first_token.endpos]]) # assigning asttokens to the start and end position of each part of the match statement, this tells exactly at what position the statement started and where it ended, and helps code to graph mapping.
 
+        sub_fg.add_node(match_node,link_type = LinkType.CONDITION) # attaching the match node with the subject i.e. any variable that is being matched or compared with the cases.
+        case_array = [] # an array of cases (initially empty)
+        for case in node.cases: # looping through each case in the match node's body
+            case_fg = self.visit(case) # visiting each node
+            case_array.append(case_fg) # appending every case visit to the array 'case_array'
+        sub_fg.parallel_merge_graphs(case_array)  
+        return sub_fg
 
+    def visit_matchCase(self, node):
+        case_node = ControlNode(ControlNode.Label.CASE, self.control_branch_stack) # creating case nodes
+        case_node.set_property(Node.Property.SYNTAX_TOKEN_INTERVALS,
+                               [[node.first_token.startpos, node.first_token.endpos]]) # assigning asttokens to the start and end position of each part of the match statement, this tells exactly at what position the statement started and where it ended, and helps code to graph mapping.
+        fg = self.create_graph()
+        fg.add_node(case_node, link_type=LinkType.CONDITION)
+        for stmt in node.body:
+            stmt_fg = self.visit(stmt)
+            fg.merge_graph(stmt_fg)
+        return fg
+
+        
     def visit_For(self, node):
         control_node = ControlNode(ControlNode.Label.FOR, node, self.control_branch_stack)
         control_node.set_property(Node.Property.SYNTAX_TOKEN_INTERVALS,

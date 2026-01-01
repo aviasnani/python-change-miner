@@ -942,9 +942,13 @@ class ASTVisitor(ast.NodeVisitor):
         
         # Creating the assignment
         assign_fg = self._visit_simple_assign(node.target, value_fg, is_op_unmappable=True)
+        for n in assign_fg.nodes:
+            n.set_property(Node.Property.UNMAPPABLE, True)
         
         # Creating a variable usage node to represent the returned value
         var_usage_fg = self._visit_var_usage(node.target)
+        for n in var_usage_fg.nodes:
+            n.set_property(Node.Property.UNMAPPABLE, True)
         
         # Merging assignment and usage graphs
         assign_fg.merge_graph(var_usage_fg)

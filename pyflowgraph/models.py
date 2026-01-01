@@ -457,6 +457,13 @@ class ExtControlFlowGraph:
                         type_label = GumTree.TypeLabel.NAME_LOAD
                     elif node.kind == DataNode.Kind.VARIABLE_DECL:
                         type_label = GumTree.TypeLabel.NAME_STORE
+            elif isinstance(node.ast, ast.NamedExpr):
+                #handles walrus operator nodes for gumrtree mapping, contribution
+                type_label = GumTree.TypeLabel.ASSIGN
+                if isinstance(node.ast.target, ast.Name):
+                    pass
+                if isinstance(node.ast.value, ast.AST):
+                    pass
             elif isinstance(node, OperationNode):
                 if node.kind == OperationNode.Kind.ASSIGN:
                     type_label = GumTree.TypeLabel.ASSIGN

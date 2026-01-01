@@ -1066,10 +1066,11 @@ class ASTVisitor(ast.NodeVisitor):
         fg.statement_sources.clear()  # todo: bad workaround
         return fg
 
-    def visitExceptionGroup(self, node):
+    def visit_ExceptionGroup(self, node):
         control_node = ControlNode(ControlNode.Label.EXCEPTION_GROUP, self.control_branch_stack)
         control_node.set_property(Node.Property.SYNTAX_TOKEN_INTERVALS,
                                   [[node.first_token.startpos, node.first_token.endpos]])
+        
         fg = self.create_graph()
         fg.add_node(control_node, link_type=LinkType.CONDITION)
         exception_fgs = []

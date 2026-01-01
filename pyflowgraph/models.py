@@ -169,7 +169,7 @@ class OperationNode(StatementNode):
         LISTCOMP = 'ListComprehension'
         DICTCOMP = 'DictComprehension'
         GENERATOREXPR = 'GeneratorExpression'
-        COMPREHENSION = 'comprehension',
+        COMPREHENSION = 'comprehension'
 
 
     class Kind:
@@ -209,9 +209,9 @@ class ControlNode(StatementNode):
         TRY = 'try'
         EXCEPT = 'except'
         ASSERT = 'assert'
-        MATCH = 'match' # contribution
-        CASE = 'case'  #contribution
-        EXCEPTION_GROUP = 'exception_group' #contribution
+        MATCH = 'match'
+        CASE = 'case' 
+        EXCEPTION_GROUP = 'exception_group' 
 
 
         ALL = [IF, FOR, TRY, EXCEPT, WHILE, ASSERT, MATCH, CASE, EXCEPTION_GROUP]

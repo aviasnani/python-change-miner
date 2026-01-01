@@ -208,11 +208,13 @@ class ControlNode(StatementNode):
         WHILE = 'while'
         TRY = 'try'
         EXCEPT = 'except'
-        ASSERT = 'assert',
-        MATCH = 'match',
-        CASE = 'case'
+        ASSERT = 'assert'
+        MATCH = 'match' # contribution
+        CASE = 'case'  #contribution
+        EXCEPTION_GROUP = 'exception_group' #contribution
 
-        ALL = [IF, FOR, TRY, EXCEPT, WHILE, ASSERT, MATCH, CASE]
+
+        ALL = [IF, FOR, TRY, EXCEPT, WHILE, ASSERT, MATCH, CASE, EXCEPTION_GROUP]
 
     def __init__(self, label, ast, control_branch_stack, /):
         super().__init__(label, ast, control_branch_stack)

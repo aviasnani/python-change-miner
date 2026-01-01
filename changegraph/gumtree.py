@@ -58,6 +58,8 @@ class GumTree:
         KEYWORD = 'keyword'
         LISTCOMP = 'ListComp'
         DICTCOMP = 'DictComp'
+        GENERATOREXPR = 'GeneratorExp'
+        COMPREHENSION = 'comprehension'
 
     def __init__(self, source_path, data):
         self.node_id_to_node = {}

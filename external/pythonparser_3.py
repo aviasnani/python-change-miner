@@ -152,10 +152,16 @@ def parse_file(filename: str) -> List[JsonNodeType]:
 
         elif isinstance(py_node, ast.arg):
             json_node['value'] = py_node.arg
+
+        # Process children.
+        if isinstance(py_node, (ast.For, ast.AsyncFor)):
+            children.append(traverse(py_node.target))
+            children.append(traverse(py_node.iter))
+            children.append(traverse_list(py_node.body, 'body', py_node))
         
-        elif isinstance(py_node, ast.ExceptionGroup):
+        '''elif isinstance(py_node, ast.ExceptionGroup):
             json_node['value'] = py_node.message
-            children.append(traverse_list(py_node.exceptions, 'exceptions', py_node))
+            children.append(traverse_list(py_node.exceptions, 'exceptions', py_node))'''
 
         # Process children.
         if isinstance(py_node, (ast.For, ast.AsyncFor)):

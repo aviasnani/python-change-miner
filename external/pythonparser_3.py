@@ -158,10 +158,6 @@ def parse_file(filename: str) -> List[JsonNodeType]:
             children.append(traverse(py_node.target))
             children.append(traverse(py_node.iter))
             children.append(traverse_list(py_node.body, 'body', py_node))
-        
-        '''elif isinstance(py_node, ast.ExceptionGroup):
-            json_node['value'] = py_node.message
-            children.append(traverse_list(py_node.exceptions, 'exceptions', py_node))'''
 
         # Process children.
         if isinstance(py_node, (ast.For, ast.AsyncFor)):
@@ -226,6 +222,7 @@ def parse_file(filename: str) -> List[JsonNodeType]:
             children.append(create_child(py_node.step, 'step', py_node))
             children.append(create_child(py_node.upper, 'upper', py_node))
 
+        
         elif py_node is not None:
             # Default handling: iterate over children.
             for child in ast.iter_child_nodes(py_node):
